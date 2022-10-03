@@ -158,13 +158,35 @@ class MainWindow(tk.Frame):
     def setVolt(self, event):        
         voltages = [self.volt0, self.volt1, self.volt2, self.volt3, self.volt4, self.volt5]
         for x in voltages:
-            x = x.get()
-            print(x)
+            volt = x.get()
+            print(volt)
+            try:
+                float(volt) # can entry be coverted to float?
+                if (float(volt) <= 10) and (float(volt) >= 0):
+                    x.delete(0, 'end')
+                    x.insert(0, float(volt))
+                else:
+                    x.delete(0, 'end')
+                    x.insert(0, 0.1)
+            except:
+                x.delete(0, 'end')
+                x.insert(0, 0.1)
     def setCur(self, event):        
         currents = [self.current0, self.current1, self.current2, self.current3, self.current4, self.current5]
         for x in currents:
-            x = x.get()
-            print(x)
+            cur = x.get()
+            print(cur)
+            try:
+                float(cur) # can entry be coverted to float?
+                if (float(cur) <= 10) and (float(cur) >= 0):
+                    x.delete(0, 'end')
+                    x.insert(0, float(cur))
+                else:
+                    x.delete(0, 'end')
+                    x.insert(0, 0.1)
+            except:
+                x.delete(0, 'end')
+                x.insert(0, 0.1)
     def setTime(self, event):        
         seconds = [self.second0, self.second1, self.second2, self.second3, self.second4, self.second5]
         minutes = [self.minute0, self.minute1, self.minute2, self.minute3, self.minute4, self.minute5]
