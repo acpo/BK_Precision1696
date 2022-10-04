@@ -6,8 +6,9 @@ except ImportError:
 from tkinter import messagebox
 
 import serial
+import a1696lib
 try:
-    ser = serial.Serial(port='COM1',
+    ser = serial.Serial(port='COM3',
                         baudrate=9600,
                         parity=serial.PARITY_NONE,
                         stopbits=serial.STOPBITS_ONE,
@@ -40,27 +41,27 @@ class MainWindow(tk.Frame):
 
         tk.Label(text = "Voltage", font='bold', fg='blue').grid(row=0,column=1)
         self.volt0 = tk.Entry(width='5')
-        self.volt0.insert(0, 0.0)
+        self.volt0.insert(0, 1.0)
         self.volt0.bind('<Return>', self.setVolt) and self.volt0.bind('<Tab>', self.setVolt)
         self.volt0.grid(column=1, row=1)
         self.volt1 = tk.Entry(width='5')
-        self.volt1.insert(0, 0.0)
+        self.volt1.insert(0, 1.0)
         self.volt1.bind('<Return>', self.setVolt) and self.volt1.bind('<Tab>', self.setVolt)
         self.volt1.grid(column=1, row=2)
         self.volt2 = tk.Entry(width='5')
-        self.volt2.insert(0, 0.0)
+        self.volt2.insert(0, 1.0)
         self.volt2.bind('<Return>', self.setVolt) and self.volt2.bind('<Tab>', self.setVolt)
         self.volt2.grid(column=1, row=3)
         self.volt3 = tk.Entry(width='5')
-        self.volt3.insert(0, 0.0)
+        self.volt3.insert(0, 1.0)
         self.volt3.bind('<Return>', self.setVolt) and self.volt3.bind('<Tab>', self.setVolt)
         self.volt3.grid(column=1, row=4)
         self.volt4 = tk.Entry(width='5')
-        self.volt4.insert(0, 0.0)
+        self.volt4.insert(0, 1.0)
         self.volt4.bind('<Return>', self.setVolt) and self.volt4.bind('<Tab>', self.setVolt)
         self.volt4.grid(column=1, row=5)
         self.volt5 = tk.Entry(width='5')
-        self.volt5.insert(0, 0.0)
+        self.volt5.insert(0, 1.0)
         self.volt5.bind('<Return>', self.setVolt) and self.volt5.bind('<Tab>', self.setVolt)
         self.volt5.grid(column=1, row=6)
 
@@ -155,6 +156,11 @@ class MainWindow(tk.Frame):
         self.PSconnect.grid(column=0, row=9, columnspan=2)
         self.PSconnect.bind('<ButtonRelease-1>', self.Connect_PS)
 
+        tk.Label(text = "Max Volts =",).grid(column=3, row=8)
+        self.maxVoltBox = tk.Label(text = "20.1", width=5).grid(column=4, row=8)
+        tk.Label(text = "Max Amps =",).grid(column=3, row=9)
+        self.maxVoltBox = tk.Label(text = "9.99", width=5).grid(column=4, row=9)
+
     def setVolt(self, event):        
         voltages = [self.volt0, self.volt1, self.volt2, self.volt3, self.volt4, self.volt5]
         for x in voltages:
@@ -162,15 +168,15 @@ class MainWindow(tk.Frame):
             print(volt)
             try:
                 float(volt) # can entry be coverted to float?
-                if (float(volt) <= 10) and (float(volt) >= 0):
+                if (float(volt) <= 20) and (float(volt) >= 1.0):
                     x.delete(0, 'end')
                     x.insert(0, float(volt))
                 else:
                     x.delete(0, 'end')
-                    x.insert(0, 0.1)
+                    x.insert(0, 1.0)
             except:
                 x.delete(0, 'end')
-                x.insert(0, 0.1)
+                x.insert(0, 1.0)
     def setCur(self, event):        
         currents = [self.current0, self.current1, self.current2, self.current3, self.current4, self.current5]
         for x in currents:
@@ -178,15 +184,15 @@ class MainWindow(tk.Frame):
             print(cur)
             try:
                 float(cur) # can entry be coverted to float?
-                if (float(cur) <= 10) and (float(cur) >= 0):
+                if (float(cur) <= 9.99) and (float(cur) >= 0):
                     x.delete(0, 'end')
                     x.insert(0, float(cur))
                 else:
                     x.delete(0, 'end')
-                    x.insert(0, 0.1)
+                    x.insert(0, 0.0)
             except:
                 x.delete(0, 'end')
-                x.insert(0, 0.1)
+                x.insert(0, 0.0)
     def setTime(self, event):        
         seconds = [self.second0, self.second1, self.second2, self.second3, self.second4, self.second5]
         minutes = [self.minute0, self.minute1, self.minute2, self.minute3, self.minute4, self.minute5]
@@ -228,14 +234,19 @@ class MainWindow(tk.Frame):
 
     def Connect_PS(self, event):
         global ConnectState
-        print(ConnectState)
         if ConnectState:  #checks for True
             ConnectState = False
             self.PSconnect.configure(background = 'pink')
+            remoteMode(ConnectState)
         else:
             ConnectState = True
             self.PSconnect.configure(background = 'light green')
-            #
+            remoteMode(ConnectState)
+            maxvalues = getMaxVoltCurr(ser)
+            print (maxvalues[1], " amps")
+            print (maxvalues[0], " volts")
+            self.maxVolt = maxvalues[0]
+            self.maxAmp = maxvalues[1]
 
     def sendProgram(self, event):
         if ConnectState:  #if connected
@@ -247,10 +258,55 @@ class MainWindow(tk.Frame):
         else:
             pass
 
+def setupProgramMemory(serial, location, voltage, current, minutes, seconds, address=0):
+    """Setup a program memory location"""
+    """location - 0-19"""
+    """voltage, current - xx.xx"""
+    """minutes, seconds - whole numbers"""
+    # needs to be modified with a loop 0 to 4 (5 steps, loc 0-4) and pull the step-number volt, etc.
+    steps = [0, 1, 2, 3, 4, 5]
+    for x in steps:
+        loc = int(x)
+        vval = int(voltage[x]) # need to store voltages in arrays
+
+        
+    loc = int(location)
+    vval = int(voltage*10)
+    cval = int(current*100)
+    sdpWrite("PROP"+"%02d"%address+"%2d"%loc+"%3d"%vval+"%03d"%cval+"%02d"%minutes+"%02d\r"%seconds, serial)
+
+def getMaxVoltCurr(serial, address=0):
+    """Get the maximum voltage and current from the supply. The response is an array: [0] = voltage, [1] = current"""
+    resp = sdpQuery("GMAX"+"%02d"%address+"\r", serial)
+    #return [int(resp[0:3])/10., int(resp[0][3:5])/10.]  #had to edit the parsing for Python 3, see next line
+    return [int(str(int(resp))[0:3])/10., int(str(int(resp))[3:6])/100.]
+
 def sdpWrite(cmd, serial):
     ser.write(cmd.encode())
     #return ser.read_until(terminator=b'\r')  #prior to v3.5
     return ser.read_until(expected=b'\r')
+def sdpQuery(cmd, serial):
+    resp = []
+    notDone = True
+    ser.write(cmd.encode())
+    while(notDone):
+        #r = ser.read_until(terminator=b'\r')  #prior to v3.5
+        r = ser.read_until(expected=b'\r')
+        if(not(len(r) > 0)):
+           notDone = False
+        else:
+            resp.append(r)
+    return resp[0]
+
+def remoteMode(state, address=0):
+    """Enable or Disable Remote mode. Other commands over usb automatically set PS to remote"""
+    """state - True/False = Enable/Disable"""
+    if state == True:
+        sdpWrite("SESS"+"%02d"%address+"\r", serial)
+        print(state)
+    else:
+        sdpWrite("ENDS"+"%02d"%address+"\r", serial)
+        print(state)
 
 
 def main():
