@@ -92,6 +92,10 @@ class MainWindow(tk.Frame):
         self.button_test.grid(column = 0, row = 10)
         self.button_test.bind('<ButtonRelease-1>', self.setupProgramMemory)
 
+        self.button_stop = tk.Button(text = "STOP", bg="red")
+        self.button_stop.grid(column = 2, row = 10)
+        self.button_stop.bind('<ButtonRelease-1>', self.stopProgram)
+
     def setVolt(self, event):        
         for x in self.volt:
             volt = x.get()
@@ -191,7 +195,7 @@ class MainWindow(tk.Frame):
         else:
             pass
 
-    def setupProgramMemory(self, event): #serial, location, voltage, current, minutes, seconds, address=0):
+    def setupProgramMemory(self, event, address=0, serial = ser): #serial, location, voltage, current, minutes, seconds, address=0):
         """Setup a program memory location"""
         """location - 0-19"""
         """voltage, current - xx.xx"""
@@ -199,18 +203,30 @@ class MainWindow(tk.Frame):
         # needs to be modified with a loop 0 to 4 (5 steps, loc 0-4) and pull the step-number volt, etc.
         steps = [0, 1, 2, 3, 4, 5]
         for x in steps:
-            loc = (x)
+            loc = int(x)
             vval = int(float(self.volt[x].get())) # need to store voltages in arrays
             vval = vval * 10
             cval = int(float(self.current[x].get()))
             cval = cval * 100
-            #n need to add minutes and seconds to the loop to get the full string of values
-            print(loc, vval, cval)
-    
-        #loc = int(location)
+            minutes = int(float(self.minute[x].get()))
+            seconds = int(float(self.second[x].get()))
 
-    # for x in steps:
-    #    sdpWrite("PROP"+"%02d"%address+"%2d"%loc+"%3d"%vval+"%03d"%cval+"%02d"%minutes+"%02d\r"%seconds, serial)
+            print(type(address), type(loc), type(vval), type(cval), type(minutes), type(seconds))
+            print(address, loc, vval, cval, minutes, seconds)
+            print("PROP"+"%02d"%address+"%02d"%loc+"%03d"%vval+"%03d"%cval+"%02d"%minutes+"%02d\r"%seconds)
+            sdpWrite("PROP"+"%02d"%address+"%02d"%loc+"%03d"%vval+"%03d"%cval+"%02d"%minutes+"%02d\r"%seconds, ser)
+        times = int(1) # run one time
+        runProgram(ser, times)
+
+    def stopProgram(self, event, serial = ser, address=0):
+        """Stop a running program"""
+        sdpWrite("STOP"+"%02d\r"%address, ser)
+
+def runProgram(serial, times, address=0):
+    """Run the timed program:
+    (times) - the number of time to run the program, 0-256 (0 = infinite)"""
+    print("RUNP"+"%02d"%address+"%03d\r"%times, ser)
+    sdpWrite("RUNP"+"%02d"%address+"%04d\r"%times, ser)
 
 def getMaxVoltCurr(serial, address=0):
     """Get the maximum voltage and current from the supply. The response is an array: [0] = voltage, [1] = current"""
@@ -222,6 +238,7 @@ def sdpWrite(cmd, serial):
     ser.write(cmd.encode())
     #return ser.read_until(terminator=b'\r')  #prior to v3.5
     return ser.read_until(expected=b'\r')
+
 def sdpQuery(cmd, serial):
     resp = []
     notDone = True
