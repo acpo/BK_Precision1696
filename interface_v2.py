@@ -70,30 +70,32 @@ class MainWindow(tk.Frame):
             entryS.grid(column=4, row=x+1)
             self.second.append(entryS)
         
-        tk.Label(text = "Program to write", font='bold').grid(row=7, column=0, columnspan=2)
-        self.Program = tk.Entry(width='5')
-        self.Program.bind('<Return>', self.memorySlot) and self.Program.bind('<Tab>', self.memorySlot)
-        self.Program.grid(column=2, row=7)
+        #tk.Label(text = "Program to write", font='bold').grid(row=7, column=0, columnspan=2)
+        #self.Program = tk.Entry(width='5')
+        #self.Program.bind('<Return>', self.memorySlot) and self.Program.bind('<Tab>', self.memorySlot)
+        #self.Program.grid(column=2, row=7)
 
         self.button_Send = tk.Button(text = "Send program to PS", font='bold')
-        self.button_Send.grid(column=0, row=8, columnspan=2)
-        self.button_Send.bind('<ButtonRelease-1>', self.sendProgram)
+        self.button_Send.grid(column=0, row=9, columnspan=2)
+        self.button_Send.bind('<ButtonRelease-1>', self.setupProgramMemory)
         
-        self.PSconnect = tk.Button(text='Connect/Disconnect', bg = "pink")
-        self.PSconnect.grid(column=0, row=9, columnspan=2)
+        self.PSconnect = tk.Button(text='Connect/Disconnect', bg = "pink", font='bold')
+        self.PSconnect.grid(column=0, row=8, columnspan=2)
         self.PSconnect.bind('<ButtonRelease-1>', self.Connect_PS)
 
         tk.Label(text = "Max Volts =",).grid(column=3, row=8)
-        self.maxVoltBox = tk.Label(text = "20.1", width=5).grid(column=4, row=8)
+        self.maxVoltBox = tk.Label(text = "---", width=5)
+        self.maxVoltBox.grid(column=4, row=8)
         tk.Label(text = "Max Amps =",).grid(column=3, row=9)
-        self.maxVoltBox = tk.Label(text = "9.99", width=5).grid(column=4, row=9)
+        self.maxAmpBox = tk.Label(text = "---", width=5)
+        self.maxAmpBox.grid(column=4, row=9)
 
-        self.button_test = tk.Button(text = "test Code")
-        self.button_test.grid(column = 0, row = 10)
-        self.button_test.bind('<ButtonRelease-1>', self.setupProgramMemory)
+        self.button_test = tk.Button(text = "Run program", bg = "powder blue", font='bold')
+        self.button_test.grid(column = 0, row = 10, columnspan=2)
+        self.button_test.bind('<ButtonRelease-1>', self.runProgram)
 
-        self.button_stop = tk.Button(text = "STOP", bg="red")
-        self.button_stop.grid(column = 2, row = 10)
+        self.button_stop = tk.Button(text = "STOP", bg="red", font='bold')
+        self.button_stop.grid(column = 3, row = 10)
         self.button_stop.bind('<ButtonRelease-1>', self.stopProgram)
 
     def setVolt(self, event):        
@@ -179,21 +181,13 @@ class MainWindow(tk.Frame):
                 print (maxvalues[0], " volts")
                 self.maxVolt = maxvalues[0]
                 self.maxAmp = maxvalues[1]
+                self.maxVoltBox.config(text = maxvalues[0])
+                self.maxAmpBox.config(text = maxvalues[1])
             except:
                 print("exception")
                 ConnectState = False
                 self.PSconnect.configure(background = 'pink')
 
-
-    def sendProgram(self, event):
-        if ConnectState:  #if connected
-            print("send string...")
-            # construct strings
-            
-            #sdpWrite()
-            # end construct strings
-        else:
-            pass
 
     def setupProgramMemory(self, event, address=0, serial = ser): #serial, location, voltage, current, minutes, seconds, address=0):
         """Setup a program memory location"""
@@ -201,32 +195,42 @@ class MainWindow(tk.Frame):
         """voltage, current - xx.xx"""
         """minutes, seconds - whole numbers"""
         # needs to be modified with a loop 0 to 4 (5 steps, loc 0-4) and pull the step-number volt, etc.
-        steps = [0, 1, 2, 3, 4, 5]
-        for x in steps:
-            loc = int(x)
-            vval = int(float(self.volt[x].get())) # need to store voltages in arrays
-            vval = vval * 10
-            cval = int(float(self.current[x].get()))
-            cval = cval * 100
-            minutes = int(float(self.minute[x].get()))
-            seconds = int(float(self.second[x].get()))
+        global ConnectState
+        if ConnectState:  #checks for True
+            steps = [0, 1, 2, 3, 4, 5]
+            for x in steps:
+                loc = int(x)
+                vval = int(float(self.volt[x].get())) # need to store voltages in arrays
+                vval = vval * 10
+                cval = int(float(self.current[x].get()))
+                cval = cval * 100
+                minutes = int(float(self.minute[x].get()))
+                seconds = int(float(self.second[x].get()))
 
-            print(type(address), type(loc), type(vval), type(cval), type(minutes), type(seconds))
-            print(address, loc, vval, cval, minutes, seconds)
-            print("PROP"+"%02d"%address+"%02d"%loc+"%03d"%vval+"%03d"%cval+"%02d"%minutes+"%02d\r"%seconds)
-            sdpWrite("PROP"+"%02d"%address+"%02d"%loc+"%03d"%vval+"%03d"%cval+"%02d"%minutes+"%02d\r"%seconds, ser)
-        times = int(1) # run one time
-        runProgram(ser, times)
+                print(type(address), type(loc), type(vval), type(cval), type(minutes), type(seconds))
+                print(address, loc, vval, cval, minutes, seconds)
+                print("PROP"+"%02d"%address+"%02d"%loc+"%03d"%vval+"%03d"%cval+"%02d"%minutes+"%02d\r"%seconds)
+                sdpWrite("PROP"+"%02d"%address+"%02d"%loc+"%03d"%vval+"%03d"%cval+"%02d"%minutes+"%02d\r"%seconds, ser)
+            times = int(1) # run one time
+        else:
+            print("no connection")
+            pass
+            # send connection error message
 
     def stopProgram(self, event, serial = ser, address=0):
         """Stop a running program"""
         sdpWrite("STOP"+"%02d\r"%address, ser)
 
-def runProgram(serial, times, address=0):
-    """Run the timed program:
-    (times) - the number of time to run the program, 0-256 (0 = infinite)"""
-    print("RUNP"+"%02d"%address+"%03d\r"%times, ser)
-    sdpWrite("RUNP"+"%02d"%address+"%04d\r"%times, ser)
+    def runProgram(self, event, serial = ser, times=1, address=0):
+        """Run the timed program:
+        (times) - the number of time to run the program, 0-256 (0 = infinite)"""
+        global ConnectState
+        if ConnectState:  #checks for True
+            print("RUNP"+"%02d"%address+"%03d\r"%times, serial)
+            sdpWrite("RUNP"+"%02d"%address+"%04d\r"%times, serial)
+        else:
+            print("no connection")
+            pass
 
 def getMaxVoltCurr(serial, address=0):
     """Get the maximum voltage and current from the supply. The response is an array: [0] = voltage, [1] = current"""
