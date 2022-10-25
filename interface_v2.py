@@ -6,7 +6,7 @@ except ImportError:
 from tkinter import messagebox
 
 import serial
-import a1696lib
+
 try:
     ser = serial.Serial(port='COM3',
                         baudrate=9600,
@@ -28,7 +28,8 @@ ConnectState = False  #set initial state of serial port connect to not connected
 class MainWindow(tk.Frame):
     def __init__(self, master=None, **kwargs):
         tk.Frame.__init__(self, master, **kwargs)
-
+        self.maxVolt = 20 #dummy limit until serial port connects
+        self.maxAmp = 10  #dummy limit until serial port connects
         steps = [0, 1, 2, 3, 4, 5]
         tk.Label(text="Step", font='bold', fg='blue').grid(row=0,column=0)
         for x in steps:
@@ -104,30 +105,37 @@ class MainWindow(tk.Frame):
             print(volt)
             try:
                 float(volt) # can entry be coverted to float?
-                if (float(volt) <= 20) and (float(volt) >= 1.0):
+                if (float(volt) <= self.maxVolt) and (float(volt) >= 1.0):
                     x.delete(0, 'end')
                     x.insert(0, float(volt))
+                    x.config({"background": "White"})
                 else:
                     x.delete(0, 'end')
                     x.insert(0, 1.0)
+                    x.config({"background": "Pink"})
             except:
                 x.delete(0, 'end')
                 x.insert(0, 1.0)
+                x.config({"background": "Pink"})
     def setCur(self, event):        
         for x in self.current:
             cur = x.get()
             print(cur)
             try:
                 float(cur) # can entry be coverted to float?
-                if (float(cur) <= 9.99) and (float(cur) >= 0):
+                if (float(cur) <= self.maxAmp) and (float(cur) >= 0):
                     x.delete(0, 'end')
                     x.insert(0, float(cur))
+                    x.config({"background": "White"})
                 else:
                     x.delete(0, 'end')
                     x.insert(0, 0.0)
+                    x.config({"background": "Pink"})
             except:
                 x.delete(0, 'end')
                 x.insert(0, 0.0)
+                x.config({"background": "Pink"})
+                
     def setTime(self, event):        
         for x in self.second:
             # check each seconds to see if between 0 and 59
@@ -183,6 +191,8 @@ class MainWindow(tk.Frame):
                 self.maxAmp = maxvalues[1]
                 self.maxVoltBox.config(text = maxvalues[0])
                 self.maxAmpBox.config(text = maxvalues[1])
+                self.setCur(event)
+                self.setVolt(event)
             except:
                 print("exception")
                 ConnectState = False
