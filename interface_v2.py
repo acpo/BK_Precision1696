@@ -244,6 +244,7 @@ class MainWindow(tk.Frame):
 
 def getMaxVoltCurr(serial, address=0):
     """Get the maximum voltage and current from the supply. The response is an array: [0] = voltage, [1] = current"""
+    #print("GMAX"+"%02d"%address+"\r", serial)
     resp = sdpQuery("GMAX"+"%02d"%address+"\r", serial)
     #return [int(resp[0:3])/10., int(resp[0][3:5])/10.]  #had to edit the parsing for Python 3, see next line
     return [int(str(int(resp))[0:3])/10., int(str(int(resp))[3:6])/100.]
@@ -270,6 +271,7 @@ def remoteMode(state, address=0):
     """Enable or Disable Remote mode. Other commands over usb automatically set PS to remote"""
     """state - True/False = Enable/Disable"""
     if state == True:
+       # print("SESS"+"%02d"%address+"\r", serial)
         sdpWrite("SESS"+"%02d"%address+"\r", serial)
         print(state)
     else:
