@@ -236,9 +236,13 @@ class MainWindow(tk.Frame):
         (times) - the number of time to run the program, 0-256 (0 = infinite)"""
         global ConnectState
         if ConnectState:  #checks for True
+            #"""Enable/Disable the output. state - True = Enable, False = Disable"""
+            # borrows pieces from the 1696lib 'output' def
+            sdpWrite("SOUT"+"%02d"%address+"0\r", serial)
             print("RUNP"+"%02d"%address+"%03d\r"%times, serial)
             sdpWrite("RUNP"+"%02d"%address+"%04d\r"%times, serial)
         else:
+            sdpWrite("SOUT"+"%02d"%address+"1\r", serial)
             print("no connection")
             pass
 
