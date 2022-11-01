@@ -8,7 +8,7 @@ from tkinter import messagebox
 import serial
 
 try:
-    ser = serial.Serial(port='COM3',
+    ser = serial.Serial(port='COM1',
                         baudrate=9600,
                         parity=serial.PARITY_NONE,
                         stopbits=serial.STOPBITS_ONE,
@@ -48,7 +48,7 @@ class MainWindow(tk.Frame):
         tk.Label(text = "Current", font='bold', fg='blue').grid(row=0,column=2)
         for x in steps:
             entryC = tk.Entry(width='5')
-            entryC.insert(0, 1.0)
+            entryC.insert(0, 1.00)
             entryC.bind('<Return>', self.setCur) and entryC.bind('<Tab>', self.setCur)
             entryC.grid(column=2, row=x+1)
             self.current.append(entryC)
@@ -129,11 +129,11 @@ class MainWindow(tk.Frame):
                     x.config({"background": "White"})
                 else:
                     x.delete(0, 'end')
-                    x.insert(0, 0.0)
+                    x.insert(0, 0.00)
                     x.config({"background": "Pink"})
             except:
                 x.delete(0, 'end')
-                x.insert(0, 0.0)
+                x.insert(0, 0.00)
                 x.config({"background": "Pink"})
                 
     def setTime(self, event):        
@@ -210,10 +210,10 @@ class MainWindow(tk.Frame):
             steps = [0, 1, 2, 3, 4, 5]
             for x in steps:
                 loc = int(x)
-                vval = int(float(self.volt[x].get())) # need to store voltages in arrays
-                vval = vval * 10
-                cval = int(float(self.current[x].get()))
-                cval = cval * 100
+                vval = 10 *(float(self.volt[x].get())) # need to store voltages in arrays
+                vval = int(vval)
+                cval = 100 * (float(self.current[x].get()))
+                cval = int(cval)
                 minutes = int(float(self.minute[x].get()))
                 seconds = int(float(self.second[x].get()))
 
