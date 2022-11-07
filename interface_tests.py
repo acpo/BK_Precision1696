@@ -4,8 +4,10 @@ except ImportError:
     import tkinter as tk
     import tkinter.filedialog   #seems to be necessary to be explicit about this dialog
 from tkinter import messagebox
+import tkinter.ttk as ttk
 
 import serial
+import serial.tools.list_ports
 
 ##try:
 ##    ser = serial.Serial(port='COM3',
@@ -102,12 +104,14 @@ class MainWindow(tk.Frame):
         self.button_stop.bind('<ButtonRelease-1>', self.stopProgram)
 
         tk.Label(text = "COM port", relief = 'sunken').grid(column=0, row=11, pady=10)
-        tk.Label(text = CommPort, relief = 'groove').grid(column=1, row=11) #use the getComm function below in the Connect/Disconnect function)
+        #tk.Label(text = CommPort, relief = 'groove').grid(column=1, row=11) #use the getComm function below in the Connect/Disconnect function)
+        self.ports_box = ttk.Combobox(values = scanSerial())
+        self.ports_box.grid(column = 1, row = 11)
+        self.ports_box.bind('<<ComboboxSelected>>', self.on_selectComm)
 
         self.button_save = tk.Button(text = "read program")
         self.button_save.grid(column = 1, row = 12)
         self.button_save.bind('<ButtonRelease-1>', self.readProgram)
-
 
     def setVolt(self, event):        
         for x in self.volt:
@@ -276,16 +280,26 @@ class MainWindow(tk.Frame):
             pass  #exits dialog on Cancel
         else:
             steps = [0, 1, 2, 3, 4, 5]
-            for x in steps:
-                with open(filename) as file:
+            with open(filename) as file:
+                for x in steps:
                     address = file.readline()
                     loc = file.readline()
                     ## can't set lists directly, instead write to the Entry Boxes directly
-                    self.volt[x] = file.readline()
-                    self.current[x] = file.readline()
-                    self.minute[x] = file.readline()
-                    self.second[x] = file.readline()
+                    self.volt[x].delete(0, 'end')
+                    self.volt[x].insert(0, float(file.readline())) 
+                    self.current[x].delete(0, 'end')
+                    self.current[x].insert(0, float(file.readline())) 
+                    self.minute[x].delete(0, 'end')
+                    self.minute[x].insert(0, float(file.readline())) 
+                    self.second[x].delete(0, 'end')
+                    self.second[x].insert(0, float(file.readline())) 
             self.setVolt(event)
+            self.setCur(event)
+
+    def on_selectComm(self, event):
+        print("comboboxes: ", self.ports_box.get())
+        ser = self.ports_box.get()
+        print (ser)
 
 def getMaxVoltCurr(serial, address=0):
     """Get the maximum voltage and current from the supply. The response is an array: [0] = voltage, [1] = current"""
@@ -328,6 +342,9 @@ def remoteMode(state, address=0):
     else:
         sdpWrite("ENDS"+"%02d"%address+"\r", serial)
         print(state)
+
+def scanSerial():
+    return serial.tools.list_ports.comports()
 
 
 def main():
