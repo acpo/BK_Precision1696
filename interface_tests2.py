@@ -76,10 +76,9 @@ class MainWindow(tk.Frame):
             entryS.grid(column=4, row=x+1)
             self.second.append(entryS)
         
-        #tk.Label(text = "Program to write", font='bold').grid(row=7, column=0, columnspan=2)
-        #self.Program = tk.Entry(width='5')
-        #self.Program.bind('<Return>', self.memorySlot) and self.Program.bind('<Tab>', self.memorySlot)
-        #self.Program.grid(column=2, row=7)
+        self.button_write = tk.Button(text = "Write program", font='bold')
+        self.button_write.grid(row=7, column=0, columnspan=2)
+        self.button_write.bind('<ButtonRelease-1>', self.writeProgram)
 
         self.button_Send = tk.Button(text = "Send program to PS", font='bold')
         self.button_Send.grid(column=0, row=9, columnspan=2)
@@ -110,9 +109,9 @@ class MainWindow(tk.Frame):
         self.ports_box.grid(column = 1, row = 11)
         self.ports_box.bind('<<ComboboxSelected>>', self.on_selectComm)
 
-        self.button_save = tk.Button(text = "read program")
-        self.button_save.grid(column = 1, row = 12)
-        self.button_save.bind('<ButtonRelease-1>', self.readProgram)
+        self.button_read = tk.Button(text = "read program")
+        self.button_read.grid(column = 1, row = 12)
+        self.button_read.bind('<ButtonRelease-1>', self.readProgram)
 
     def setVolt(self, event):        
         for x in self.volt:
@@ -240,22 +239,22 @@ class MainWindow(tk.Frame):
             times = int(1) # run one time
         else:
             print("no connection")
-            steps = [0, 1, 2, 3, 4, 5]
-            for x in steps:
-                loc = int(x)
-                vval = 10 *(float(self.volt[x].get())) # need to store voltages in arrays
-                vval = int(vval)
-                cval = 100 * (float(self.current[x].get()))
-                cval = int(cval)
-                minutes = int(float(self.minute[x].get()))
-                seconds = int(float(self.second[x].get()))
-                
-                print(address, loc, vval, cval, minutes, seconds)
-# works for saving a program as text
-                progstring = str(address) + "\n" + str(loc) + "\n" + str(self.volt[x].get()) + "\n" + str(self.current[x].get()) + "\n" + str(minutes) + "\n" + str(seconds)
-                with open('BKprogram.txt', 'a') as file:
-                    file.write(progstring)
-                    file.write(str("\n"))
+##            steps = [0, 1, 2, 3, 4, 5]
+##            for x in steps:
+##                loc = int(x)
+##                vval = 10 *(float(self.volt[x].get())) # need to store voltages in arrays
+##                vval = int(vval)
+##                cval = 100 * (float(self.current[x].get()))
+##                cval = int(cval)
+##                minutes = int(float(self.minute[x].get()))
+##                seconds = int(float(self.second[x].get()))
+##                
+##                print(address, loc, vval, cval, minutes, seconds)
+### works for saving a program as text
+##                progstring = str(address) + "\n" + str(loc) + "\n" + str(self.volt[x].get()) + "\n" + str(self.current[x].get()) + "\n" + str(minutes) + "\n" + str(seconds)
+##                with open('BKprogram.txt', 'a') as file:
+##                    file.write(progstring)
+##                    file.write(str("\n"))
             pass
             # send connection error message
 
@@ -273,6 +272,32 @@ class MainWindow(tk.Frame):
         else:
             print("no connection")
             pass
+
+    def writeProgram(self, event):
+        print("write a program")
+        address = 0  # this is the only option for address of multistep program
+        filename = tk.filedialog.asksaveasfile(title = "Select program to write", filetypes = [("Text file",".txt"),("CSV file",".csv")], defaultextension='.txt')
+        if not filename:
+            pass  #exits dialog on Cancel
+        else:
+            with open(filename.name, 'w') as file:
+                
+                steps = [0, 1, 2, 3, 4, 5]
+                for x in steps:
+                    loc = int(x)
+                    vval = 10 *(float(self.volt[x].get())) # need to store voltages in arrays
+                    vval = int(vval)
+                    cval = 100 * (float(self.current[x].get()))
+                    cval = int(cval)
+                    minutes = int(float(self.minute[x].get()))
+                    seconds = int(float(self.second[x].get()))
+                    
+                    print(loc, vval, cval, minutes, seconds)
+
+                    progstring = str(address) + "\n" + str(loc) + "\n" + str(self.volt[x].get()) + "\n" + str(self.current[x].get()) + "\n" + str(minutes) + "\n" + str(seconds)
+                    #with open('BKprogram.txt', 'a') as file:
+                    file.write(progstring)
+                    file.write(str("\n"))
 
     def readProgram(self, event):
         print("read a program")
