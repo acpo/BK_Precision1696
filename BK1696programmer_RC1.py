@@ -229,10 +229,6 @@ class MainWindow(tk.Frame):
                 cval = int(cval)
                 minutes = int(float(self.minute[x].get()))
                 seconds = int(float(self.second[x].get()))
-
-                print(type(address), type(loc), type(vval), type(cval), type(minutes), type(seconds))
-                print(address, loc, vval, cval, minutes, seconds)
-                print("PROP"+"%02d"%address+"%02d"%loc+"%03d"%vval+"%03d"%cval+"%02d"%minutes+"%02d\r"%seconds)
                 sdpWrite("PROP"+"%02d"%address+"%02d"%loc+"%03d"%vval+"%03d"%cval+"%02d"%minutes+"%02d\r"%seconds, ser)
             times = int(1) # run one time
         else:
