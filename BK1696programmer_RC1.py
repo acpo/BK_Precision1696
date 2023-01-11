@@ -197,7 +197,7 @@ class MainWindow(tk.Frame):
             ConnectState = True
             self.PSconnect.configure(background = 'light green')
             remoteMode(ConnectState)
-            CommPort = getComm() #query to power supply to verify Comm Port
+            CommPort = getComm(ser) #query to power supply to verify Comm Port
             try:
                 maxvalues = getMaxVoltCurr(ser)
                 self.maxVolt = maxvalues[0]
@@ -245,8 +245,10 @@ class MainWindow(tk.Frame):
         (times) - the number of time to run the program, 0-256 (0 = infinite)"""
         global ConnectState
         if ConnectState:  #checks for True
+            sdpWrite("SOUT"+"%02d"%address+"0\r", serial) # connects outputs on BK 1696
             sdpWrite("RUNP"+"%02d"%address+"%04d\r"%times, serial)
         else:
+            sdpWrite("SOUT"+"%02d"%address+"1\r", serial) # disconnects output
             print("no connection")
             pass
 
@@ -296,6 +298,7 @@ class MainWindow(tk.Frame):
         global ser
         port = self.ports_box.get()
         ser.port = port
+        ser.open()
 
 # Service functions below
 def getMaxVoltCurr(serial, address=0):
