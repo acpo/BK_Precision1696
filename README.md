@@ -7,4 +7,5 @@ The goal is to control voltage, current, and time for a 5-step program.  BK Prec
 - error checking of numerical entries
 - ability to run the program 
 ## To do:  
-- report COM port baud, etc  
+- report COM port baud, etc 
+- make useful notifications for COM exceptions
