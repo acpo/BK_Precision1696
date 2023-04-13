@@ -1,3 +1,6 @@
+## current work:  see line 193 for explicit connect/disconnect of serial port
+#  to free communications so we don't need to quit every time for testing the ETA
+
 try:
     import Tkinter as tk
 except ImportError:
