@@ -185,7 +185,6 @@ class MainWindow(tk.Frame):
         if (ser.isOpen() == True):  #checks if serial port is open
             try:
                 self.PSconnect.configure(background = 'pink')  # sets button to disconnected
-                sdpWrite("SOUT"+"%02d"%address+"1\r", serial) # disconnects output
                 ser.close()  # sets port closed
             except:
                 print("exception")
@@ -240,6 +239,7 @@ class MainWindow(tk.Frame):
     def stopProgram(self, event, serial = ser, address=0):
         """Stop a running program"""
         sdpWrite("STOP"+"%02d\r"%address, ser)
+        sdpWrite("SOUT"+"%02d"%address+"1\r", serial) # disconnects output
 
     def runProgram(self, event, serial = ser, times=1, address=0):
         """Run the timed program:
