@@ -6,6 +6,7 @@ except ImportError:
 from tkinter import messagebox
 import tkinter.ttk as ttk
 
+
 import serial
 import serial.tools.list_ports
 
@@ -183,26 +184,32 @@ class MainWindow(tk.Frame):
     def Connect_PS(self, event):
         if (ser.isOpen() == True):  #checks if serial port is open
             try:
-                self.PSconnect.configure(background = 'pink')
+                self.PSconnect.configure(background = 'pink')  # sets port closed
                 ser.close()
             except:
                 print("exception")
                 self.PSconnect.configure(background = 'pink')
         else:
-            ser.open()
-            self.PSconnect.configure(background = 'light green')
-            CommPort = getComm(ser) #query to power supply to verify Comm Port
             try:
-                maxvalues = getMaxVoltCurr(ser)
-                self.maxVolt = maxvalues[0]
-                self.maxAmp = maxvalues[1]
-                self.maxVoltBox.config(text = maxvalues[0])
-                self.maxAmpBox.config(text = maxvalues[1])
-                self.setCur(event)
-                self.setVolt(event)
+                ser.open()
+                self.PSconnect.configure(background = 'light green')
+                CommPort = getComm(ser) #query to power supply to verify Comm Port
+                try:
+                    maxvalues = getMaxVoltCurr(ser)
+                    self.maxVolt = maxvalues[0]
+                    self.maxAmp = maxvalues[1]
+                    self.maxVoltBox.config(text = maxvalues[0])
+                    self.maxAmpBox.config(text = maxvalues[1])
+                    self.setCur(event)
+                    self.setVolt(event)
+                except:
+                    print("exception")
+                    self.PSconnect.configure(background = 'pink')
             except:
-                print("exception")
+                messagebox.showerror(title="Exception Error", message="Forgot to select port?")
                 self.PSconnect.configure(background = 'pink')
+            
+            
 
 
     def setupProgramMemory(self, event, address=0, serial = ser): #serial, location, voltage, current, minutes, seconds, address=0):
@@ -341,6 +348,7 @@ def scanSerial():
 
 def main():
     root = tk.Tk()
+    root.wm_title("BK Precision 1696 Programming Interface")
     app = MainWindow(root)
     app.grid()
     root.mainloop()
