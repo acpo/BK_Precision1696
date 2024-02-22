@@ -184,8 +184,9 @@ class MainWindow(tk.Frame):
     def Connect_PS(self, event):
         if (ser.isOpen() == True):  #checks if serial port is open
             try:
-                self.PSconnect.configure(background = 'pink')  # sets port closed
-                ser.close()
+                self.PSconnect.configure(background = 'pink')  # sets button to disconnected
+                sdpWrite("SOUT"+"%02d"%address+"1\r", serial) # disconnects output
+                ser.close()  # sets port closed
             except:
                 print("exception")
                 self.PSconnect.configure(background = 'pink')
